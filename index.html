@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile AI Final Fix</title>
+    <title>Firebase AI Fix</title>
     <style>
-        body { font-family: sans-serif; background: #0a0a0a; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { font-family: sans-serif; background: #050505; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px; border-radius: 15px; max-width: 85%; line-height: 1.4; }
+        .msg { padding: 12px; border-radius: 15px; max-width: 85%; font-size: 15px; }
         .user { background: #007bff; align-self: flex-end; }
         .bot { background: #1a1a1a; border-left: 3px solid #00ffcc; align-self: flex-start; color: #00ffcc; }
         .input-box { background: #111; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #333; }
         input { flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 25px; outline: none; }
-        button { background: #00ffcc; color: #000; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; }
+        button { background: #00ffcc; color: #000; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -22,7 +22,7 @@
     </div>
 
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="Ask anything...">
+        <input type="text" id="userInput" placeholder="Yahan likhein...">
         <button id="sendBtn">Send</button>
     </div>
 
@@ -30,10 +30,44 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getVertexAI, getGenerativeModel } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-vertexai-preview.js";
 
-        // IMPORTANT: Apne Firebase Console se ye details dhyan se bharein
+        // 1. Apni Firebase Config yahan bilkul sahi se bharein
         const firebaseConfig = {
-            apiKey: "AIzaSy...", // Aapki API Key
+            apiKey: "AIzaSy...", 
             authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const vertexAI = getVertexAI(app);
+        const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
+
+        // Fix: onclick ki jagah Event Listener use kiya hai
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            const input = document.getElementById('userInput');
+            const chat = document.getElementById('chat');
+            const text = input.value.trim();
+            if (!text) return;
+
+            chat.innerHTML += `<div class="msg user">${text}</div>`;
+            input.value = "";
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const result = await model.generateContent(text);
+                const response = await result.response;
+                chat.innerHTML += `<div class="msg bot">${response.text()}</div>`;
+            } catch (e) {
+                console.error(e);
+                chat.innerHTML += `<div class="msg bot" style="color:red">Error: Vertex AI ko Firebase Console mein enable karein!</div>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
+        });
+    </script>
+</body>
+</html>
             projectId: "your-project-id",
             storageBucket: "your-project.appspot.com",
             messagingSenderId: "123456789",
