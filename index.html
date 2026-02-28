@@ -3,102 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile AI Fixed</title>
+    <title>Vanilla Web Application</title>
+    
     <style>
-        body { font-family: sans-serif; background: #0a0a0a; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px; border-radius: 15px; max-width: 85%; font-size: 14px; word-wrap: break-word; }
-        .user { background: #007bff; align-self: flex-end; }
-        .bot { background: #1a1a1a; border-left: 3px solid #00ffcc; align-self: flex-start; color: #00ffcc; }
-        .input-box { background: #111; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #333; }
-        input { flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 20px; outline: none; }
-        button { background: #00ffcc; color: #000; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; }
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            color: #475569;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #dynamic-content {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #f1f5f9;
+            min-height: 60px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="chat"><div class="msg bot">System Online. Gemini AI Ready!</div></div>
-    <div class="input-box">
-        <input type="text" id="userInput" placeholder="Ask anything...">
-        <button id="sendBtn">Send</button>
+    <div class="container">
+        <h1>App Interface</h1>
+        <p>This template is completely free of build tools, external dependencies, and module imports.</p>
+        
+        <button id="action-btn">Trigger Action</button>
+
+        <div id="dynamic-content">
+            Awaiting interaction...
+        </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getVertexAI, getGenerativeModel } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-vertexai-preview.js";
+    <script>
+        // Using an Immediately Invoked Function Expression (IIFE) 
+        // to avoid polluting the global window object.
+        (function() {
+            'use strict';
 
-        // Yahan apni Firebase details sahi se bharein
-        const firebaseConfig = {
-            apiKey: "AIzaSy...", 
-            authDomain: "your-project.firebaseapp.com",
-            projectId: "your-project-id",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
+            // 1. Element References
+            var actionBtn = document.getElementById('action-btn');
+            var dynamicContent = document.getElementById('dynamic-content');
 
-        const app = initializeApp(firebaseConfig);
-        const vertexAI = getVertexAI(app);
-        const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
+            // 2. State
+            var interactionCount = 0;
 
-        const chat = document.getElementById('chat');
-        const input = document.getElementById('userInput');
-
-        document.getElementById('sendBtn').onclick = async () => {
-            const text = input.value.trim();
-            if (!text) return;
-
-            // User msg add karein
-            const uDiv = document.createElement('div');
-            uDiv.className = 'msg user';
-            uDiv.textContent = text;
-            chat.appendChild(uDiv);
-            input.value = "";
-
-            try {
-                const result = await model.generateContent(text);
-                const response = await result.response;
+            // 3. Logic & Event Handlers
+            function handleAction() {
+                interactionCount++;
                 
-                // Bot msg add karein
-                const bDiv = document.createElement('div');
-                bDiv.className = 'msg bot';
-                bDiv.textContent = response.text();
-                chat.appendChild(bDiv);
-            } catch (e) {
-                const eDiv = document.createElement('div');
-                eDiv.className = 'msg bot';
-                eDiv.style.color = 'red';
-                eDiv.textContent = "Error: Check Firebase Vertex AI settings!";
-                chat.appendChild(eDiv);
+                // Pure DOM manipulation, no frameworks needed
+                dynamicContent.innerHTML = '<strong>Success!</strong> Button clicked ' + interactionCount + ' times.';
+                dynamicContent.style.backgroundColor = '#dcfce7'; // Light green background
+                dynamicContent.style.borderColor = '#bbf7d0';
             }
-            chat.scrollTop = chat.scrollHeight;
-        };
+
+            // 4. Initialization
+            function init() {
+                if (actionBtn) {
+                    actionBtn.addEventListener('click', handleAction);
+                }
+                console.log('Application loaded successfully. No imports detected.');
+            }
+
+            // Start the script
+            init();
+        })();
     </script>
 </body>
 </html>
-            projectId: "your-project-id",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const vertexAI = getVertexAI(app);
-        const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
-
-        const chat = document.getElementById('chat');
-        const input = document.getElementById('userInput');
-        const btn = document.getElementById('sendBtn');
-
-        btn.addEventListener('click', async () => {
-            const text = input.value.trim();
-            if (!text) return;
-
-            // User Message
-            const userDiv = document.createElement('div');
-            userDiv.className = 'msg user';
-            userDiv.textContent = text;
-            chat.appendChild(userDiv);
             
             input.value = "";
             chat.scrollTop = chat.scrollHeight;
