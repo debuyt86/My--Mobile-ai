@@ -3,25 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile AI Final</title>
+    <title>Mobile AI Fixed</title>
     <style>
-        body { font-family: sans-serif; background: #080808; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { font-family: sans-serif; background: #0a0a0a; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px; border-radius: 15px; max-width: 85%; font-size: 15px; line-height: 1.4; }
+        .msg { padding: 12px; border-radius: 15px; max-width: 85%; font-size: 14px; word-wrap: break-word; }
         .user { background: #007bff; align-self: flex-end; }
         .bot { background: #1a1a1a; border-left: 3px solid #00ffcc; align-self: flex-start; color: #00ffcc; }
-        .input-box { background: #111; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #333; }
-        input { flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 25px; outline: none; }
-        button { background: #00ffcc; color: #000; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        .input-box { background: #111; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #333; }
+        input { flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 20px; outline: none; }
+        button { background: #00ffcc; color: #000; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="chat">
-        <div class="msg bot">System Online. Gemini AI Ready!</div>
-    </div>
-
-    <div class="input-area">
+    <div id="chat"><div class="msg bot">System Online. Gemini AI Ready!</div></div>
+    <div class="input-box">
         <input type="text" id="userInput" placeholder="Ask anything...">
         <button id="sendBtn">Send</button>
     </div>
@@ -30,10 +27,55 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getVertexAI, getGenerativeModel } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-vertexai-preview.js";
 
-        // YAHAN APNI ASLI CONFIG BHAREIN
+        // Yahan apni Firebase details sahi se bharein
         const firebaseConfig = {
             apiKey: "AIzaSy...", 
             authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const vertexAI = getVertexAI(app);
+        const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
+
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('userInput');
+
+        document.getElementById('sendBtn').onclick = async () => {
+            const text = input.value.trim();
+            if (!text) return;
+
+            // User msg add karein
+            const uDiv = document.createElement('div');
+            uDiv.className = 'msg user';
+            uDiv.textContent = text;
+            chat.appendChild(uDiv);
+            input.value = "";
+
+            try {
+                const result = await model.generateContent(text);
+                const response = await result.response;
+                
+                // Bot msg add karein
+                const bDiv = document.createElement('div');
+                bDiv.className = 'msg bot';
+                bDiv.textContent = response.text();
+                chat.appendChild(bDiv);
+            } catch (e) {
+                const eDiv = document.createElement('div');
+                eDiv.className = 'msg bot';
+                eDiv.style.color = 'red';
+                eDiv.textContent = "Error: Check Firebase Vertex AI settings!";
+                chat.appendChild(eDiv);
+            }
+            chat.scrollTop = chat.scrollHeight;
+        };
+    </script>
+</body>
+</html>
             projectId: "your-project-id",
             storageBucket: "your-project.appspot.com",
             messagingSenderId: "123456789",
