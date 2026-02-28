@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase AI Fix</title>
+    <title>Mobile AI Final</title>
     <style>
-        body { font-family: sans-serif; background: #050505; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { font-family: sans-serif; background: #080808; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px; border-radius: 15px; max-width: 85%; font-size: 15px; }
+        .msg { padding: 12px; border-radius: 15px; max-width: 85%; font-size: 15px; line-height: 1.4; }
         .user { background: #007bff; align-self: flex-end; }
         .bot { background: #1a1a1a; border-left: 3px solid #00ffcc; align-self: flex-start; color: #00ffcc; }
         .input-box { background: #111; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #333; }
@@ -18,11 +18,11 @@
 <body>
 
     <div id="chat">
-        <div class="msg bot">System Online. Firebase + Gemini Ready!</div>
+        <div class="msg bot">System Online. Gemini AI Ready!</div>
     </div>
 
-    <div class="input-box">
-        <input type="text" id="userInput" placeholder="Yahan likhein...">
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask anything...">
         <button id="sendBtn">Send</button>
     </div>
 
@@ -30,10 +30,59 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getVertexAI, getGenerativeModel } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-vertexai-preview.js";
 
-        // 1. Apni Firebase Config yahan bilkul sahi se bharein
+        // YAHAN APNI ASLI CONFIG BHAREIN
         const firebaseConfig = {
             apiKey: "AIzaSy...", 
             authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const vertexAI = getVertexAI(app);
+        const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
+
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('userInput');
+        const btn = document.getElementById('sendBtn');
+
+        btn.addEventListener('click', async () => {
+            const text = input.value.trim();
+            if (!text) return;
+
+            // User Message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'msg user';
+            userDiv.textContent = text;
+            chat.appendChild(userDiv);
+            
+            input.value = "";
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const result = await model.generateContent(text);
+                const response = await result.response;
+                
+                // Bot Message
+                const botDiv = document.createElement('div');
+                botDiv.className = 'msg bot';
+                botDiv.textContent = response.text();
+                chat.appendChild(botDiv);
+            } catch (e) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'msg bot';
+                errorDiv.style.color = 'red';
+                errorDiv.textContent = "Error: Check Firebase Config or Vertex AI Enablement!";
+                chat.appendChild(errorDiv);
+                console.error(e);
+            }
+            chat.scrollTop = chat.scrollHeight;
+        });
+    </script>
+</body>
+</html>
             projectId: "your-project-id",
             storageBucket: "your-project.appspot.com",
             messagingSenderId: "123456789",
