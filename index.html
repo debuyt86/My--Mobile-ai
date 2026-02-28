@@ -3,19 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Mobile AI</title>
+    <title>Mobile AI Final Fix</title>
     <style>
-        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; }
+        body { font-family: sans-serif; background: #0a0a0a; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 12px; border-radius: 15px; max-width: 85%; line-height: 1.4; }
+        .user { background: #007bff; align-self: flex-end; }
+        .bot { background: #1a1a1a; border-left: 3px solid #00ffcc; align-self: flex-start; color: #00ffcc; }
+        .input-box { background: #111; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #333; }
+        input { flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 25px; outline: none; }
+        button { background: #00ffcc; color: #000; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <iframe
-        src="https://www.stack-ai.com/embed/5a40b36c-92f7-4f65-8b32-849544766f85/65c5d0e7-38e5-4767-9d72-888888888888"
-        title="AI Chat"
-    ></iframe>
+    <div id="chat">
+        <div class="msg bot">System Online. Firebase + Gemini Ready!</div>
+    </div>
 
+    <div class="input-box">
+        <input type="text" id="userInput" placeholder="Ask anything...">
+        <button id="sendBtn">Send</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getVertexAI, getGenerativeModel } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-vertexai-preview.js";
+
+        // IMPORTANT: Apne Firebase Console se ye details dhyan se bharein
+        const firebaseConfig = {
+            apiKey: "AIzaSy...", // Aapki API Key
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const vertexAI = getVertexAI(app);
+        const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
+
+        // Button click event (runAI error fix)
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            const input = document.getElementById('userInput');
+            const chat = document.getElementById('chat');
+            const text = input.value.trim();
+            if (!text) return;
+
+            chat.innerHTML += `<div class="msg user">${text}</div>`;
+            input.value = "";
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const result = await model.generateContent(text);
+                const response = await result.response;
+                chat.innerHTML += `<div class="msg bot">${response.text()}</div>`;
+            } catch (e) {
+                console.error(e);
+                chat.innerHTML += `<div class="msg bot" style="color:red">Error: Please check Firebase Vertex AI is enabled!</div>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
+        });
+    </script>
 </body>
 </html>
-
