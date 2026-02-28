@@ -3,76 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile AI Final</title>
+    <title>My Mobile AI</title>
     <style>
-        body { font-family: sans-serif; background: #000; color: #00ffcc; padding: 15px; display: flex; flex-direction: column; height: 100vh; margin: 0; }
-        #chat { flex: 1; overflow-y: auto; border: 1px solid #333; padding: 10px; background: #111; border-radius: 10px; margin-bottom: 10px; }
-        .msg { margin: 10px 0; padding: 10px; border-radius: 8px; max-width: 80%; }
-        .user { background: #007bff; color: white; align-self: flex-end; margin-left: auto; }
-        .bot { background: #222; border-left: 3px solid #00ffcc; }
-        .input-area { display: flex; gap: 10px; padding-bottom: 10px; }
-        input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; outline: none; }
-        button { padding: 10px 20px; border-radius: 20px; border: none; background: #00ffcc; color: #000; font-weight: bold; }
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-    <h3>AI v3.1 System Live</h3>
-    <div id="chat" style="display:flex; flex-direction:column;"></div>
-    <div id="status" style="font-size: 10px; color: #555; margin-bottom: 5px;">Ready</div>
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Yahan likhein...">
-        <button onclick="askAI()">Send</button>
-    </div>
 
-    <script>
-        // Token ko split kiya hai taaki GitHub block na kare
-        const p1 = "Hf_HpgvTAAbegIXM";
-        const p2 = "fNSQqcSIgpfSciDqbfmuN";
-        const TK = p1 + p2;
+    <iframe
+        src="https://www.stack-ai.com/embed/5a40b36c-92f7-4f65-8b32-849544766f85/65c5d0e7-38e5-4767-9d72-888888888888"
+        title="AI Chat"
+    ></iframe>
 
-        async function askAI() {
-            const input = document.getElementById('userInput');
-            const chat = document.getElementById('chat');
-            const status = document.getElementById('status');
-            const val = input.value.trim();
-            if(!val) return;
-
-            chat.innerHTML += `<div class="msg user">${val}</div>`;
-            input.value = "";
-            chat.scrollTop = chat.scrollHeight;
-            status.innerText = "Processing...";
-
-            try {
-                // Mistral Model use kar rahe hain
-                const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", {
-                    method: "POST",
-                    headers: { 
-                        "Authorization": `Bearer ${TK}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ 
-                        inputs: `<s>[INST] ${val} [/INST]`,
-                        options: { wait_for_model: true } 
-                    })
-                });
-
-                const data = await response.json();
-                status.innerText = "Ready";
-
-                if (response.ok) {
-                    let aiMsg = data[0].generated_text.split('[/INST]').pop().trim();
-                    chat.innerHTML += `<div class="msg bot"><b>AI:</b> ${aiMsg}</div>`;
-                } else if (response.status === 503) {
-                    chat.innerHTML += `<div class="msg bot" style="color:orange;">Model load ho raha hai. 20 sec baad fir se send karein.</div>`;
-                } else {
-                    chat.innerHTML += `<div class="msg bot" style="color:red;">Error: ${data.error || "Server Busy"}</div>`;
-                }
-            } catch (e) {
-                // Failed to fetch ka main ilaj:
-                chat.innerHTML += `<div class="msg bot" style="color:red;">API Error! GitHub link ko Kiwi Browser mein open karein.</div>`;
-            }
-            chat.scrollTop = chat.scrollHeight;
-        }
-    </script>
 </body>
 </html>
+
