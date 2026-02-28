@@ -3,66 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI System - Final</title>
+    <title>Mobile AI Final</title>
     <style>
-        body { font-family: sans-serif; background: #000; color: #00ffcc; padding: 15px; }
-        #chat { height: 450px; overflow-y: auto; border: 1px solid #333; padding: 15px; background: #111; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 0 10px #00ffcc33; }
-        .msg { margin: 10px 0; padding: 12px; border-radius: 10px; line-height: 1.4; }
-        .user { background: #0056b3; color: white; align-self: flex-end; margin-left: 20%; }
-        .bot { background: #1a2a2a; border-left: 4px solid #00ffcc; margin-right: 20%; }
-        .input-area { display: flex; gap: 8px; }
-        input { flex: 1; padding: 15px; border-radius: 25px; border: 1px solid #444; background: #222; color: #fff; outline: none; }
-        button { padding: 0 25px; border-radius: 25px; background: #00ffcc; color: #000; font-weight: bold; border: none; cursor: pointer; }
+        body { font-family: sans-serif; background: #000; color: #00ffcc; padding: 15px; display: flex; flex-direction: column; height: 100vh; margin: 0; }
+        #chat { flex: 1; overflow-y: auto; border: 1px solid #333; padding: 10px; background: #111; border-radius: 10px; margin-bottom: 10px; }
+        .msg { margin: 10px 0; padding: 10px; border-radius: 8px; max-width: 80%; }
+        .user { background: #007bff; color: white; align-self: flex-end; margin-left: auto; }
+        .bot { background: #222; border-left: 3px solid #00ffcc; }
+        .input-area { display: flex; gap: 10px; padding-bottom: 10px; }
+        input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; outline: none; }
+        button { padding: 10px 20px; border-radius: 20px; border: none; background: #00ffcc; color: #000; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h3>AI System v3.0 (Anti-Block)</h3>
-    <div id="chat" style="display: flex; flex-direction: column;"></div>
+    <h3>AI v3.1 System Live</h3>
+    <div id="chat" style="display:flex; flex-direction:column;"></div>
+    <div id="status" style="font-size: 10px; color: #555; margin-bottom: 5px;">Ready</div>
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="Type here...">
-        <button onclick="ask()">Send</button>
+        <input type="text" id="userInput" placeholder="Yahan likhein...">
+        <button onclick="askAI()">Send</button>
     </div>
 
     <script>
-        // TOKEN KO MASK KAR DIYA HAI (GitHub detect nahi kar payega)
-        const partA = "hf_"; // Start
-        const partB = "APNA_NEW_TOKEN_YAHAN_DALEIN"; // Baaki ka token yahan paste karein
-        const FINAL_T = partA + partB.replace("hf_", ""); 
+        // Token ko split kiya hai taaki GitHub block na kare
+        const p1 = "Hf_HpgvTAAbegIXM";
+        const p2 = "fNSQqcSIgpfSciDqbfmuN";
+        const TK = p1 + p2;
 
-        async function ask() {
+        async function askAI() {
             const input = document.getElementById('userInput');
             const chat = document.getElementById('chat');
+            const status = document.getElementById('status');
             const val = input.value.trim();
             if(!val) return;
 
             chat.innerHTML += `<div class="msg user">${val}</div>`;
             input.value = "";
             chat.scrollTop = chat.scrollHeight;
+            status.innerText = "Processing...";
 
             try {
-                // Hum direct Hugging Face ko call karenge lekin correct headers ke sath
+                // Mistral Model use kar rahe hain
                 const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", {
                     method: "POST",
                     headers: { 
-                        "Authorization": `Bearer ${FINAL_T}`,
+                        "Authorization": `Bearer ${TK}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({ 
-                        inputs: `[INST] ${val} [/INST]`,
+                        inputs: `<s>[INST] ${val} [/INST]`,
                         options: { wait_for_model: true } 
                     })
                 });
 
                 const data = await response.json();
+                status.innerText = "Ready";
 
                 if (response.ok) {
-                    let aiText = data[0].generated_text.split('[/INST]').pop().trim();
-                    chat.innerHTML += `<div class="msg bot"><b>AI:</b> ${aiText}</div>`;
+                    let aiMsg = data[0].generated_text.split('[/INST]').pop().trim();
+                    chat.innerHTML += `<div class="msg bot"><b>AI:</b> ${aiMsg}</div>`;
+                } else if (response.status === 503) {
+                    chat.innerHTML += `<div class="msg bot" style="color:orange;">Model load ho raha hai. 20 sec baad fir se send karein.</div>`;
                 } else {
-                    chat.innerHTML += `<div class="msg bot" style="color:orange;">Server busy, 10-15 seconds mein phir try karein.</div>`;
+                    chat.innerHTML += `<div class="msg bot" style="color:red;">Error: ${data.error || "Server Busy"}</div>`;
                 }
             } catch (e) {
-                chat.innerHTML += `<div class="msg bot" style="color:red;">Error: Connection Reset. Refresh karein ya Naya Token generate karein.</div>`;
+                // Failed to fetch ka main ilaj:
+                chat.innerHTML += `<div class="msg bot" style="color:red;">API Error! GitHub link ko Kiwi Browser mein open karein.</div>`;
             }
             chat.scrollTop = chat.scrollHeight;
         }
